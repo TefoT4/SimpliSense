@@ -1,0 +1,27 @@
+{
+  "name": "Explaino",
+  "description": "Explainer: Harness the power of AI to demystify words and concepts, turning complex ideas into clear, understandable insights anytime, anywhere.",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Explaino",
+    "default_icon": "icon48.png"
+  },
+  "permissions": ["storage"],
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"]
+    }
+  ]
+}
