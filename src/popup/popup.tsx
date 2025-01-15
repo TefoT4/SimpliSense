@@ -1,9 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Info, User, MousePointer } from "lucide-react"; // Importing Lucid icons
+import DraggableDialog from "../components/draggableDialog.tsx";
 import "../styles/global.css";
 
 const App: React.FC<{}> = () => {
+  const [response, setResponse] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (message: any) => {
+      if (message.type === "RESPONSE_RECEIVED") {
+        setResponse(message.payload.text); // Adjust based on your backend response structure
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage);
+    };
+  }, []);
+
+  const handleCloseDialog = () => {
+    setResponse(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-white p-6 flex flex-col items-center w-80">
       {/* Header */}
@@ -24,7 +45,6 @@ const App: React.FC<{}> = () => {
       </div>
 
       {/* Details */}
-
       <div className="w-full max-w-md bg-white shadow-xl rounded-lg p-4">
         <div className="flex items-center mb-2">
           <Info className="w-5 h-5 text-blue-500 mr-2" />
@@ -40,16 +60,18 @@ const App: React.FC<{}> = () => {
         </div>
       </div>
 
-      <div className="flex items-center">
+      <div className="flex items-center mb-4">
         <MousePointer className="w-10 h-10 text-blue-500 mr-2" />{" "}
-        {/* Updated icon */}
         <p className="text-sm text-gray-600">
           Highlight or select text in your browser to receive instant, detailed
           explanations of words, phrases, or concepts effortlessly.
         </p>
       </div>
 
-      {/* Footer */}
+      {/* Draggable Dialog */}
+      {response && (
+        <DraggableDialog response={response} onClose={handleCloseDialog} />
+      )}
     </div>
   );
 };

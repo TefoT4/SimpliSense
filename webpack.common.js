@@ -2,6 +2,7 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const Dotenv = require("dotenv-webpack"); // Import dotenv-webpack
 
 module.exports = {
   entry: {
@@ -54,6 +55,7 @@ module.exports = {
       ],
     }),
     ...getHtmlPlugins(["popup", "options"]),
+    new Dotenv(),
   ],
   output: {
     filename: "[name].js",

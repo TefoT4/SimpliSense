@@ -6,19 +6,14 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2017", "dom"], 
-    "types": ["chrome"], 
-    "noImplicitAny": true, 
-    "strict": true, 
-    "outDir": "./dist", 
-    "sourceMap": true, 
-    "allowSyntheticDefaultImports": true 
+    "lib": ["es2017", "dom"],
+    "types": ["node", "chrome"],
+    "noImplicitAny": true,
+    "strict": true,
+    "outDir": "./dist",
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "src/**/*.ts", 
-    "src/**/*.tsx" 
-, "src/framework/LLM.tx"  ],
-  "exclude": [
-    "node_modules" 
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/framework/LLM.tx"],
+  "exclude": ["node_modules"]
 }
