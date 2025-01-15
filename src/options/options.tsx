@@ -21,6 +21,26 @@ const App: React.FC<{}> = () => {
   const handleSaveSettings = () => {
     chrome.storage.sync.set({ preferredLLM, apiKey }, () => {
       console.log("Settings saved successfully!");
+
+      chrome.notifications.create(
+        {
+          type: "basic",
+          iconUrl: "icon48.png", // Ensure the path is correct
+          title: "Explaino Extension",
+          message: "User preferences saved successfully!",
+          priority: 2,
+        },
+        (notificationId) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              "Notification error:",
+              chrome.runtime.lastError.message
+            );
+          } else {
+            console.log("Notification sent successfully:", notificationId);
+          }
+        }
+      );
     });
   };
 
