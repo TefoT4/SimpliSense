@@ -1,30 +1,46 @@
 let socket: WebSocket | null = null;
+const backendUrl = process.env.REACT_APP_BACKEND_URL || "wss://default-url";
+let retryCount = 0;
+const maxRetries = 30;
+const retryInterval = 60 * 1000; // 60 seconds
 
-// Dynamically load backend URL from environment variables
-const backendUrl = process.env.REACT_APP_BACKEND_URL;
+// Function to create WebSocket connection
+function connectWebSocket() {
+  if (!backendUrl) {
+    console.error("Backend URL is not defined!");
+    return;
+  }
 
-if (!backendUrl) {
-  console.error("Backend URL is not defined in environment variables!");
-} else {
-  socket = new WebSocket(backendUrl);
+  try {
+    socket = new WebSocket(backendUrl);
 
-  // WebSocket event handlers
-  socket.onopen = () => {
-    console.log("WebSocket connection established.");
-  };
+    // WebSocket Event Handlers
+    socket.onopen = () => {
+      console.log("WebSocket connected successfully.");
+      retryCount = 0; // Reset retry count on successful connection
+      sendNotification(
+        "WebSocket Connection",
+        "Connected to the server successfully!"
+      );
+    };
+  } catch (error) {
+    console.error("Error creating WebSocket:", error);
+    retryConnection;
+    return;
+  }
 
   socket.onmessage = (event) => {
     try {
       const response = JSON.parse(event.data);
-      console.log("Received message from WebSocket:", response);
+      console.log("Message from server:", response);
 
-      // Send response to other extension parts via runtime messaging
+      // Forward the response to other parts of the extension
       chrome.runtime.sendMessage({
         type: "RESPONSE_RECEIVED",
         payload: response,
       });
     } catch (error) {
-      console.error("Error parsing WebSocket message:", error);
+      console.error("Error parsing message:", error);
     }
   };
 
@@ -34,10 +50,46 @@ if (!backendUrl) {
 
   socket.onclose = () => {
     console.log("WebSocket connection closed.");
+    if (retryCount < maxRetries) {
+      retryConnection();
+    } else {
+      sendNotification(
+        "WebSocket Connection",
+        `Connection failed after ${maxRetries} attempts. No further retries.`
+      );
+    }
   };
 }
 
-// Listen for context menu interactions
+// Retry mechanism for WebSocket connection
+function retryConnection() {
+  retryCount++;
+  console.log(`Retry attempt ${retryCount} of ${maxRetries}`);
+  sendNotification(
+    "WebSocket Connection",
+    `Retrying connection (${retryCount}/${maxRetries}) in 60 seconds...`
+  );
+
+  setTimeout(() => {
+    connectWebSocket();
+  }, retryInterval);
+}
+
+// Send notifications
+function sendNotification(title: string, message: string) {
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "images/icon128.png",
+    title: title,
+    message: message,
+    priority: 2,
+  });
+}
+
+// Initialize WebSocket connection
+connectWebSocket();
+
+// Context Menu Setup
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "processText",
@@ -52,6 +104,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       socket.send(JSON.stringify({ text: info.selectionText }));
     } else {
       console.warn("WebSocket is not open.");
+      sendNotification(
+        "WebSocket Error",
+        "Unable to send message. Connection is not open."
+      );
     }
   }
 });

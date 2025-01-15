@@ -11,6 +11,10 @@
   "description": "",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.33.1",
+    "@langchain/anthropic": "^0.3.11",
+    "@langchain/core": "^0.3.30",
+    "@langchain/google-genai": "^0.1.6",
+    "@langchain/openai": "^0.3.17",
     "langchain": "^0.3.11",
     "openai": "^4.78.1",
     "ws": "^8.18.0"
