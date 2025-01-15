@@ -2,23 +2,23 @@
   "compilerOptions": {
     "jsx": "react",
     "module": "es6",
-    "target": "es6",
+    "target": "es2017",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es6", "dom"], // Adds support for DOM and ES6 features
-    "types": ["chrome"], // Include types for Chrome API
-    "noImplicitAny": true, // Prevents implicit 'any' type
-    "strict": true, // Enables all strict type checking options
-    "outDir": "./dist", // Output directory for compiled JavaScript files
-    "sourceMap": true, // Generate corresponding '.map' files
-    "allowSyntheticDefaultImports": true // Allows default imports from modules with no default export
+    "lib": ["es2017", "dom"], 
+    "types": ["chrome"], 
+    "noImplicitAny": true, 
+    "strict": true, 
+    "outDir": "./dist", 
+    "sourceMap": true, 
+    "allowSyntheticDefaultImports": true 
   },
   "include": [
-    "src/**/*.ts", // Include TypeScript files in the src directory
-    "src/**/*.tsx" // Include TypeScript with JSX files
-  ],
+    "src/**/*.ts", 
+    "src/**/*.tsx" 
+, "src/framework/LLM.tx"  ],
   "exclude": [
-    "node_modules" // Exclude node_modules from compilation
+    "node_modules" 
   ]
 }
