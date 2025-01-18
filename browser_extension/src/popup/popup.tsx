@@ -34,7 +34,7 @@ const App: React.FC<{}> = () => {
           className="w-16 h-16 object-contain mr-4"
           alt="extension icon"
         />
-        <h1 className="text-2xl font-bold text-blue-600">Explaino</h1>
+        <h1 className="text-2xl font-bold text-blue-600">SimpliSense</h1>
       </div>
 
       {/* Description */}

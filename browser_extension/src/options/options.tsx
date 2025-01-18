@@ -26,7 +26,7 @@ const App: React.FC<{}> = () => {
         {
           type: "basic",
           iconUrl: "icon48.png", // Ensure the path is correct
-          title: "Explaino Extension",
+          title: "SimpliSense Extension",
           message: "User preferences saved successfully!",
           priority: 2,
         },
@@ -55,7 +55,7 @@ const App: React.FC<{}> = () => {
             alt="extension icon"
           />
           <h1 className="text-2xl font-bold text-blue-600">
-            Explaino Settings
+            SimpliSense Settings
           </h1>
         </div>
 

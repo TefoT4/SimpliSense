@@ -1,4 +1,4 @@
-# Explaino Chrome Extension
+# SimpliSense Chrome Extension
 
 A Chrome extension built with React, TypeScript, and Tailwind CSS.
 
@@ -7,9 +7,9 @@ A Chrome extension built with React, TypeScript, and Tailwind CSS.
 1. `npm i` to install dependencies
 2. Create necessary configuration files:
 
-    ``` bash
-    npx tailwindcss init 
-    ```
+   ```bash
+   npx tailwindcss init
+   ```
 
 3. Create `postcss.config.js` in the root directory
 4. Create `src/styles/global.css` for Tailwind imports
@@ -26,7 +26,7 @@ module.exports = {
     tailwindcss: {},
     autoprefixer: {},
   },
-}
+};
 ```
 
 `src/styles/global.css`
@@ -42,15 +42,12 @@ module.exports = {
 ```javascript
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./src/**/*.html",
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}", "./src/**/*.html"],
   theme: {
     extend: {},
   },
   plugins: [],
-}
+};
 ```
 
 ## Loading The Chrome Extension

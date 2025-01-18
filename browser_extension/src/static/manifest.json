@@ -1,5 +1,5 @@
 {
-  "name": "Explaino",
+  "name": "SimpliSense",
   "description": "Explainer: Harness the power of AI to demystify words and concepts, turning complex ideas into clear, understandable insights anytime, anywhere.",
   "version": "1.0.0",
   "manifest_version": 3,
@@ -10,7 +10,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Explaino",
+    "default_title": "SimpliSense",
     "default_icon": "icon48.png"
   },
   "permissions": ["storage", "notifications", "contextMenus"],
