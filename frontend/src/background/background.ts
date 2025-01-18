@@ -93,7 +93,7 @@ connectWebSocket();
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "processText",
-    title: "Process with Explaino",
+    title: "Explain with Explaino",
     contexts: ["selection"],
   });
 });

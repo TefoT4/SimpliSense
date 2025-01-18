@@ -1,61 +1,103 @@
-import WebSocket, { WebSocketServer } from "ws";
+import * as dotenv from "dotenv";
+import { WebSocketServer, WebSocket } from "ws";
+import { LlmFactory } from "./LLM/Factory/LlmFactory";
+import { WebSocketMessage } from "./Shared/WebSocketMessage";
+import { LLM } from "./Shared/WebSocketMessage";
+dotenv.config();
 
-// Define message types
-interface ClientMessage {
-  text: string;
-}
+const PORT = process.env.SERVER_PORT || 9900;
 
-interface ServerMessage {
-  original: string;
-  processed: string;
-}
+// Create WebSocket Server
+const websockerServer = new WebSocketServer({ port: Number(PORT) });
 
-// Create the WebSocket server
-const PORT = 8080;
-const wss = new WebSocketServer({ port: PORT }, () => {
-  console.log(`WebSocket server started on ws://localhost:${PORT}`);
-});
+console.log(`WebSocket server is running on ws://localhost:${PORT}`);
 
-// Handle client connections
-wss.on("connection", (ws: WebSocket) => {
+websockerServer.on("connection", (webSocker: WebSocket) => {
   console.log("Client connected");
 
-  // Handle messages from clients
-  ws.on("message", (data: WebSocket.RawData) => {
-    console.log("Received:", data.toString());
-
+  webSocker.on("message", (data) => {
     try {
-      // Parse incoming message
-      const message: ClientMessage = JSON.parse(data.toString());
+      // Parse the incoming data
+      const parsedData: WebSocketMessage = JSON.parse(data.toString());
 
-      // Process the text (example: reverse the text)
-      const processedText = message.text.split("").reverse().join("");
+      if (!parsedData.Llm || !parsedData.Content) {
+        throw new Error("Invalid message structure");
+      }
 
-      // Send response back to the client
-      const response: ServerMessage = {
-        original: message.text,
-        processed: processedText,
-      };
-      ws.send(JSON.stringify(response));
-      
-    } catch (error) {
-      console.error("Error processing message:", error);
-      ws.send(
+      if (parsedData.Llm !== LLM.Gemini && !parsedData.ApiKey) {
+        throw new Error("Missing API key");
+      }
+
+      if (parsedData.Llm === LLM.Gemini && !parsedData.ApiKey) {
+        parsedData.ApiKey = process.env.GEMINI_API_KEY!;
+      }
+
+      console.log("Received message:", parsedData);
+
+      // Send the parsed data to an AI model
+      sendRequestToLLM(parsedData, webSocker);
+    } catch (err) {
+      console.error("Error processing message:", err);
+      webSocker.send(
         JSON.stringify({
-          error:
-            "Invalid message format. Expected JSON with a 'text' property.",
+          error: "Invalid message format. Ensure the JSON object is correct.",
         })
       );
     }
   });
 
-  // Handle connection close
-  ws.on("close", () => {
+  webSocker.on("close", () => {
     console.log("Client disconnected");
   });
-
-  // Handle errors
-  ws.on("error", (error) => {
-    console.error("WebSocket error:", error);
-  });
 });
+
+async function sendRequestToLLM(
+  parsedData: WebSocketMessage,
+  webSocker: WebSocket
+) {
+  const llm = LlmFactory.CreateLLM(parsedData.Llm, parsedData.ApiKey);
+
+  if (!llm) {
+    console.error("Failed to create LLM instance");
+    webSocker.send(
+      JSON.stringify({
+        error: "Failed to create LLM instance. Check LLM type and API key.",
+      })
+    );
+    return;
+  }
+
+  try {
+    await llm.sendMessageStream(parsedData.Content, {
+      onToken: (token) => {
+        // Send each token back to the client
+        webSocker.send(JSON.stringify({ type: "token", data: token }));
+      },
+      onComplete: () => {
+        // Notify the client that the stream is complete
+        webSocker.send(
+          JSON.stringify({ type: "complete", message: "Stream completed" })
+        );
+        console.log("\n\nStream completed");
+      },
+      onError: (error) => {
+        // Notify the client of an error
+        webSocker.send(
+          JSON.stringify({
+            type: "error",
+            message: error.message || "Unknown error",
+          })
+        );
+        console.error("Stream error:", error);
+      },
+    });
+  } catch (error: any) {
+    console.error("Error:", error);
+    webSocker.send(
+      JSON.stringify({
+        type: "error",
+        message: error.message || "Unknown error",
+      })
+    );
+  }
+}

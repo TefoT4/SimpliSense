@@ -1,27 +1,27 @@
 {
-  "name": "backend",
+  "name": "langchainjs",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node src/server.ts"
   },
+  "type": "commonjs",
   "keywords": [],
-  "author": "",
+  "author": "Tefo Motatamali",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.33.1",
-    "@langchain/anthropic": "^0.3.11",
     "@langchain/core": "^0.3.30",
     "@langchain/google-genai": "^0.1.6",
-    "@langchain/openai": "^0.3.17",
+    "dotenv": "^16.4.7",
     "langchain": "^0.3.11",
-    "openai": "^4.78.1",
     "ws": "^8.18.0"
   },
+  "overrides": {
+    "@langchain/core": "^0.3.30"
+  },
   "devDependencies": {
-    "@types/node": "^22.10.6",
     "@types/ws": "^8.5.13",
-    "typescript": "^5.7.3"
+    "ts-node": "^10.9.2"
   }
 }
