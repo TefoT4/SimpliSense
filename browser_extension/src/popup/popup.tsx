@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Info, User, MousePointer } from "lucide-react"; // Importing Lucid icons
-import DraggableDialog from "../components/draggableDialog.js";
+import DraggableDialog from "../components/draggableDialog";
 import "../styles/global.css";
 
 const App: React.FC<{}> = () => {
@@ -10,7 +10,7 @@ const App: React.FC<{}> = () => {
   useEffect(() => {
     const handleMessage = (message: any) => {
       if (message.type === "RESPONSE_RECEIVED") {
-        setResponse(message.payload.text); // Adjust based on your backend response structure
+        setResponse(message.payload.text);
       }
     };
 

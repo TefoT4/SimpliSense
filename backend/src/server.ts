@@ -19,8 +19,9 @@ websockerServer.on("connection", (webSocker: WebSocket) => {
     try {
       // Parse the incoming data
       const parsedData: WebSocketMessage = JSON.parse(data.toString());
+      console.log("Formated message:\n", parsedData);
 
-      if (!parsedData.Llm || !parsedData.Content) {
+      if (!parsedData.Llm || !parsedData.Query) {
         throw new Error("Invalid message structure");
       }
 
@@ -68,7 +69,7 @@ async function sendRequestToLLM(
   }
 
   try {
-    await llm.sendMessageStream(parsedData.Content, {
+    await llm.sendMessageStream(parsedData.Query, {
       onToken: (token) => {
         // Send each token back to the client
         webSocker.send(JSON.stringify({ type: "token", data: token }));

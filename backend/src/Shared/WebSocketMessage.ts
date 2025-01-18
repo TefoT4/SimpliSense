@@ -11,5 +11,5 @@ export interface WebSocketMessage {
   Id: string;
   Llm: LLM;
   ApiKey: string;
-  Content: string;
+  Query: string;
 }

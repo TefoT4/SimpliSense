@@ -1,8 +1,14 @@
+import { v4 as getId } from "uuid";
+
+let retryCount: number = 0;
+const maxRetries: number = 30;
+const retryInterval: number = 60 * 1000; // 60 seconds
 let socket: WebSocket | null = null;
-const backendUrl = process.env.REACT_APP_BACKEND_URL || "wss://default-url";
-let retryCount = 0;
-const maxRetries = 30;
-const retryInterval = 60 * 1000; // 60 seconds
+const backendUrl: string = process.env.REACT_APP_BACKEND_URL!;
+
+let savedId: string = "";
+let savedApiKey: string = "";
+let savedPreferredLLM: string = "";
 
 // Function to create WebSocket connection
 function connectWebSocket() {
@@ -79,7 +85,7 @@ function retryConnection() {
 function sendNotification(title: string, message: string) {
   chrome.notifications.create({
     type: "basic",
-    iconUrl: "images/icon128.png",
+    iconUrl: "icon128.png",
     title: title,
     message: message,
     priority: 2,
@@ -96,18 +102,58 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "Explain with SimpliSense",
     contexts: ["selection"],
   });
+
+  chrome.storage.sync.get(["Id", "apiKey", "preferredLLM"], (result) => {
+    if (
+      (result.Id === undefined || result.Id === null || result.Id === "") &&
+      (result.preferredLLM === undefined ||
+        result.preferredLLM === null ||
+        result.preferredLLM === "")
+    ) {
+      chrome.storage.sync.set(
+        {
+          Id: getId(),
+          apiKey: "",
+          preferredLLM: "gemini",
+        },
+        () => {
+          chrome.storage.sync.get(
+            ["Id", "apiKey", "preferredLLM"],
+            (result) => {
+              savedId = result.Id;
+              savedApiKey = result.apiKey;
+              savedPreferredLLM = result.preferredLLM;
+
+              console.log(
+                `Saved settings: ID ${savedId}, apiKey ${savedApiKey}, preferredLLM ${savedPreferredLLM}`
+              );
+            }
+          );
+        }
+      );
+    }
+  });
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "processText" && info.selectionText && socket) {
+    const query = info.selectionText;
+    const jsonMessage = JSON.stringify({
+      Id: savedId,
+      Llm: savedPreferredLLM,
+      ApiKey: savedApiKey,
+      Query: query,
+    });
+
+    console.log(jsonMessage);
     if (socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ text: info.selectionText }));
-    } else {
-      console.warn("WebSocket is not open.");
-      sendNotification(
-        "WebSocket Error",
-        "Unable to send message. Connection is not open."
-      );
+      socket.send(jsonMessage);
     }
+  } else {
+    console.warn("WebSocket is not open.");
+    sendNotification(
+      "WebSocket Error",
+      "Unable to send message. Connection is not open."
+    );
   }
 });
