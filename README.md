@@ -1,6 +1,6 @@
-## Project Title
+## SimpliSense
 
-SimpliSense - Harness the power of AI to demystify words and concepts, turning complex ideas into clear, understandable insights anytime, anywhere.
+Harness the power of AI to demystify words and concepts, turning complex ideas into clear, understandable insights anytime, anywhere.
 
 ![SimpliSense](https://github.com/TefoT4/SimpliSense/blob/master/browser_extension/src/static/main.png)
 
