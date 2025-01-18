@@ -4,14 +4,12 @@ import { WebSocketMessageQueue } from "./WebSocketMessageQueue";
 import { StorageConfig } from "../models/StorageConfig";
 import { ServerResponse } from "../models/ServerResponse";
 import { WebSocketMessage } from "../models/WebSocketMessage";
-import { LlmResponseMessageQueue } from "../framework/LlmResponseMessageQueue";
 import { LlmResponseMessage } from "../models/LlmResponseMessage";
 
 export class WebSocketManager {
   private socket: WebSocket | null = null;
   private retryCount = 0;
   private messageQueue: WebSocketMessageQueue;
-  private responseMessageQueue: LlmResponseMessageQueue;
   private config: StorageConfig;
 
   constructor(
@@ -21,7 +19,6 @@ export class WebSocketManager {
       })()
   ) {
     this.messageQueue = new WebSocketMessageQueue();
-    this.responseMessageQueue = new LlmResponseMessageQueue();
     this.config = {
       Id: "",
       apiKey: "",
@@ -97,22 +94,16 @@ export class WebSocketManager {
         this.log(LogLevel.INFO, "Message from server:", response);
 
         if (response.type === "token") {
-          const responseMessage: LlmResponseMessage = {
-            type: response.type,
-            data: response.payload,
-            message: "",
-          };
-          this.responseMessageQueue.enqueue(responseMessage);
-        } else if (response.type === "complete") {
-          
-          const processedMessage = await this.responseMessageQueue.processQueue();
-
-          console.log(LogLevel.INFO, "Processed message:", processedMessage);
+          console.log(LogLevel.INFO, "Token Message:", response.payload);
 
           await chrome.runtime.sendMessage({
             type: "RESPONSE_RECEIVED",
-            payload: await processedMessage,
+            payload: await response.payload,
           });
+        }
+
+        if (response.type === "complete") {
+          console.log(LogLevel.INFO, "Complete Message:", response.payload);
         }
       } catch (error) {
         this.log(LogLevel.ERROR, "Error parsing message:", error);

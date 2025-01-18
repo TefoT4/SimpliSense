@@ -23,5 +23,11 @@
       "matches": ["<all_urls>"],
       "js": ["contentScript.js"]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["response.html"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }

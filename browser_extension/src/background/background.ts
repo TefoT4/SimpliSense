@@ -78,3 +78,15 @@ chrome.storage.onChanged.addListener(async (changes) => {
     await wsManager.updateConfig(updates);
   }
 });
+
+chrome.runtime.onMessage.addListener(async (event) => {
+  if (event.type === "RESPONSE_RECEIVED") {
+    // Create or update the response window
+    chrome.windows.create({
+      url: chrome.runtime.getURL("response.html"),
+      type: "popup",
+      width: 400,
+      height: 600,
+    });
+  }
+});
