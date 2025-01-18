@@ -1,159 +1,80 @@
 import { v4 as getId } from "uuid";
+import { WebSocketManager } from "../framework/WebSocketManager";
+import { StorageConfig } from "../models/StorageConfig";
+import { CONFIG } from "../models/Config";
+import { WebSocketMessage } from "../models/WebSocketMessage";
 
-let retryCount: number = 0;
-const maxRetries: number = 30;
-const retryInterval: number = 60 * 1000; // 60 seconds
-let socket: WebSocket | null = null;
-const backendUrl: string = process.env.REACT_APP_BACKEND_URL!;
+// Initialize WebSocket Manager
+const wsManager = new WebSocketManager();
 
-let savedId: string = "";
-let savedApiKey: string = "";
-let savedPreferredLLM: string = "";
-
-// Function to create WebSocket connection
-function connectWebSocket() {
-  if (!backendUrl) {
-    console.error("Backend URL is not defined!");
-    return;
-  }
-
+// Storage initialization
+async function initializeStorage(): Promise<void> {
   try {
-    socket = new WebSocket(backendUrl);
-
-    // WebSocket Event Handlers
-    socket.onopen = () => {
-      console.log("WebSocket connected successfully.");
-      retryCount = 0; // Reset retry count on successful connection
-      sendNotification(
-        "WebSocket Connection",
-        "Connected to the server successfully!"
-      );
-    };
+    await chrome.storage.sync.get(["Id", "apiKey", "preferredLLM"], (result) => {
+      if (!result.Id || !result.preferredLLM) {
+        const newSettings: StorageConfig = {
+          Id: getId(),
+          apiKey: "",
+          preferredLLM: CONFIG.defaultLLM,
+        };
+        wsManager.updateConfig(newSettings);
+      } else {
+        wsManager.updateConfig(result as StorageConfig);
+      }
+      
+    });    
   } catch (error) {
-    console.error("Error creating WebSocket:", error);
-    retryConnection;
-    return;
+    console.error("Storage initialization failed:", error);
+    throw error;
   }
-
-  socket.onmessage = (event) => {
-    try {
-      const response = JSON.parse(event.data);
-      console.log("Message from server:", response);
-
-      // Forward the response to other parts of the extension
-      chrome.runtime.sendMessage({
-        type: "RESPONSE_RECEIVED",
-        payload: response,
-      });
-    } catch (error) {
-      console.error("Error parsing message:", error);
-    }
-  };
-
-  socket.onerror = (error) => {
-    console.error("WebSocket encountered an error:", error);
-  };
-
-  socket.onclose = () => {
-    console.log("WebSocket connection closed.");
-    if (retryCount < maxRetries) {
-      retryConnection();
-    } else {
-      sendNotification(
-        "WebSocket Connection",
-        `Connection failed after ${maxRetries} attempts. No further retries.`
-      );
-    }
-  };
 }
-
-// Retry mechanism for WebSocket connection
-function retryConnection() {
-  retryCount++;
-  console.log(`Retry attempt ${retryCount} of ${maxRetries}`);
-  sendNotification(
-    "WebSocket Connection",
-    `Retrying connection (${retryCount}/${maxRetries}) in 60 seconds...`
-  );
-
-  setTimeout(() => {
-    connectWebSocket();
-  }, retryInterval);
-}
-
-// Send notifications
-function sendNotification(title: string, message: string) {
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: "icon128.png",
-    title: title,
-    message: message,
-    priority: 2,
-  });
-}
-
-// Initialize WebSocket connection
-connectWebSocket();
 
 // Context Menu Setup
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
+chrome.runtime.onInstalled.addListener(async () => {
+  await chrome.contextMenus.create({
     id: "processText",
     title: "Explain with SimpliSense",
     contexts: ["selection"],
   });
 
-  chrome.storage.sync.get(["Id", "apiKey", "preferredLLM"], (result) => {
-    if (
-      (result.Id === undefined || result.Id === null || result.Id === "") &&
-      (result.preferredLLM === undefined ||
-        result.preferredLLM === null ||
-        result.preferredLLM === "")
-    ) {
-      chrome.storage.sync.set(
-        {
-          Id: getId(),
-          apiKey: "",
-          preferredLLM: "gemini",
-        },
-        () => {
-          chrome.storage.sync.get(
-            ["Id", "apiKey", "preferredLLM"],
-            (result) => {
-              savedId = result.Id;
-              savedApiKey = result.apiKey;
-              savedPreferredLLM = result.preferredLLM;
-
-              console.log(
-                `Saved settings: ID ${savedId}, apiKey ${savedApiKey}, preferredLLM ${savedPreferredLLM}`
-              );
-            }
-          );
-        }
-      );
-    }
-  });
+  await initializeStorage();
+  wsManager.connect();
 });
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "processText" && info.selectionText && socket) {
-    const query = info.selectionText;
-    const jsonMessage = JSON.stringify({
-      Id: savedId,
-      Llm: savedPreferredLLM,
-      ApiKey: savedApiKey,
-      Query: query,
-    });
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener(async (info) => {
+  if (info.menuItemId === "processText" && info.selectionText) {
+    const config = wsManager.getConfig();
+    const message: WebSocketMessage = {
+      Id: config.Id,
+      Llm: config.preferredLLM,
+      ApiKey: config.apiKey,
+      Query: info.selectionText.trim(),
+    };
 
-    console.log(jsonMessage);
-    if (socket.readyState === WebSocket.OPEN) {
-      socket.send(jsonMessage);
-    }
-  } else {
-    console.warn("WebSocket is not open.");
-    sendNotification(
-      "WebSocket Error",
-      "Unable to send message. Connection is not open."
-    );
+    await wsManager.sendMessage(message);
+  }
+});
+
+// Cleanup on extension unload
+chrome.runtime.onSuspend.addListener(() => {
+  // Close WebSocket connection
+  const socket = wsManager["socket"];
+  if (socket) {
+    socket.close();
+  }
+});
+
+// Listen for storage changes
+chrome.storage.onChanged.addListener(async (changes) => {
+  const updates: Partial<StorageConfig> = {};
+
+  if (changes.Id) updates.Id = changes.Id.newValue;
+  if (changes.apiKey) updates.apiKey = changes.apiKey.newValue;
+  if (changes.preferredLLM)
+    updates.preferredLLM = changes.preferredLLM.newValue;
+
+  if (Object.keys(updates).length > 0) {
+    await wsManager.updateConfig(updates);
   }
 });
