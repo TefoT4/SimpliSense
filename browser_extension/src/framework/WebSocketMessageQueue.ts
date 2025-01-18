@@ -1,6 +1,6 @@
 import { WebSocketMessage } from "../models/WebSocketMessage";
 
-export class MessageQueue {
+export class WebSocketMessageQueue {
   private queue: WebSocketMessage[] = [];
 
   enqueue(message: WebSocketMessage): void {

@@ -1,14 +1,17 @@
 import { CONFIG } from "../models/Config";
 import { LogLevel } from "../models/LogLevel";
-import { MessageQueue } from "./MessageQueue";
+import { WebSocketMessageQueue } from "./WebSocketMessageQueue";
 import { StorageConfig } from "../models/StorageConfig";
 import { ServerResponse } from "../models/ServerResponse";
 import { WebSocketMessage } from "../models/WebSocketMessage";
+import { LlmResponseMessageQueue } from "../framework/LlmResponseMessageQueue";
+import { LlmResponseMessage } from "../models/LlmResponseMessage";
 
 export class WebSocketManager {
   private socket: WebSocket | null = null;
   private retryCount = 0;
-  private messageQueue: MessageQueue;
+  private messageQueue: WebSocketMessageQueue;
+  private responseMessageQueue: LlmResponseMessageQueue;
   private config: StorageConfig;
 
   constructor(
@@ -17,7 +20,8 @@ export class WebSocketManager {
         throw new Error("Backend URL is required");
       })()
   ) {
-    this.messageQueue = new MessageQueue();
+    this.messageQueue = new WebSocketMessageQueue();
+    this.responseMessageQueue = new LlmResponseMessageQueue();
     this.config = {
       Id: "",
       apiKey: "",
@@ -27,7 +31,7 @@ export class WebSocketManager {
 
   private log(level: LogLevel, message: string, data?: unknown): void {
     const timestamp = new Date().toISOString();
-    
+
     (console as any)[LogLevel[level].toLowerCase()](
       `[${timestamp}] ${message}`,
       data
@@ -92,10 +96,24 @@ export class WebSocketManager {
         const response = JSON.parse(event.data) as ServerResponse;
         this.log(LogLevel.INFO, "Message from server:", response);
 
-        await chrome.runtime.sendMessage({
-          type: "RESPONSE_RECEIVED",
-          payload: response,
-        });
+        if (response.type === "token") {
+          const responseMessage: LlmResponseMessage = {
+            type: response.type,
+            data: response.payload,
+            message: "",
+          };
+          this.responseMessageQueue.enqueue(responseMessage);
+        } else if (response.type === "complete") {
+          
+          const processedMessage = await this.responseMessageQueue.processQueue();
+
+          console.log(LogLevel.INFO, "Processed message:", processedMessage);
+
+          await chrome.runtime.sendMessage({
+            type: "RESPONSE_RECEIVED",
+            payload: await processedMessage,
+          });
+        }
       } catch (error) {
         this.log(LogLevel.ERROR, "Error parsing message:", error);
       }
