@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Info, User, MousePointer } from "lucide-react"; // Importing Lucid icons
-import DraggableDialog from "../components/draggableDialog.tsx";
+import DraggableDialog from "../components/draggableDialog.js";
 import "../styles/global.css";
 
 const App: React.FC<{}> = () => {
