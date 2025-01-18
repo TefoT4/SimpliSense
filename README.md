@@ -6,7 +6,7 @@ Harness the power of AI to demystify words and concepts, turning complex ideas i
 
 ## Description
 
-SimpliSense is a browser extension and web application that uses AI to explain complex concepts and ideas in simple terms. It provides a user-friendly interface for interacting with different AI models and allows users to get explanations for any text they select on the web.
+SimpliSense is a browser extension and web application that uses AI to explain complex concepts and words in simple terms. It provides a user-friendly interface for interacting with different AI models and allows users to get explanations for any text they select on the web.
 
 ## Table of Contents
 
