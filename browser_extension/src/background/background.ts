@@ -10,19 +10,21 @@ const wsManager = new WebSocketManager();
 // Storage initialization
 async function initializeStorage(): Promise<void> {
   try {
-    await chrome.storage.sync.get(["Id", "apiKey", "preferredLLM"], (result) => {
-      if (!result.Id || !result.preferredLLM) {
-        const newSettings: StorageConfig = {
-          Id: getId(),
-          apiKey: "",
-          preferredLLM: CONFIG.defaultLLM,
-        };
-        wsManager.updateConfig(newSettings);
-      } else {
-        wsManager.updateConfig(result as StorageConfig);
+    await chrome.storage.sync.get(
+      ["Id", "apiKey", "preferredLLM"],
+      (result) => {
+        if (!result.Id || !result.preferredLLM) {
+          const newSettings: StorageConfig = {
+            Id: getId(),
+            apiKey: "",
+            preferredLLM: CONFIG.defaultLLM,
+          };
+          wsManager.updateConfig(newSettings);
+        } else {
+          wsManager.updateConfig(result as StorageConfig);
+        }
       }
-      
-    });    
+    );
   } catch (error) {
     console.error("Storage initialization failed:", error);
     throw error;
@@ -79,14 +81,12 @@ chrome.storage.onChanged.addListener(async (changes) => {
   }
 });
 
-chrome.runtime.onMessage.addListener(async (event) => {
-  if (event.type === "RESPONSE_RECEIVED") {
-    // Create or update the response window
-    chrome.windows.create({
-      url: chrome.runtime.getURL("response.html"),
-      type: "popup",
-      width: 400,
-      height: 600,
-    });
+// Track active popup windows
+let activePopupId: number = 100;
+
+// Clean up when popup closes
+chrome.windows.onRemoved.addListener((windowId) => {
+  if (windowId === activePopupId) {
+    activePopupId = 0;
   }
 });

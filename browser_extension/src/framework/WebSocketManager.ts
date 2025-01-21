@@ -4,7 +4,6 @@ import { WebSocketMessageQueue } from "./WebSocketMessageQueue";
 import { StorageConfig } from "../models/StorageConfig";
 import { ServerResponse } from "../models/ServerResponse";
 import { WebSocketMessage } from "../models/WebSocketMessage";
-import { LlmResponseMessage } from "../models/LlmResponseMessage";
 
 export class WebSocketManager {
   private socket: WebSocket | null = null;
@@ -91,19 +90,27 @@ export class WebSocketManager {
     this.socket.onmessage = async (event) => {
       try {
         const response = JSON.parse(event.data) as ServerResponse;
-        this.log(LogLevel.INFO, "Message from server:", response);
 
         if (response.type === "token") {
-          console.log(LogLevel.INFO, "Token Message:", response.payload);
+          console.log(LogLevel.INFO, "Token Message:", response.data);
 
-          await chrome.runtime.sendMessage({
+          const message = {
             type: "RESPONSE_RECEIVED",
-            payload: await response.payload,
+            payload: response.data,
+          };
+          console.log(
+            "Sending chrome runtime message to background.ts:",
+            message
+          );
+          await chrome.runtime.sendMessage(message, (response) => {
+            console.log(
+              `Response from background.ts: ${JSON.stringify(response)}`
+            );
           });
         }
 
         if (response.type === "complete") {
-          console.log(LogLevel.INFO, "Complete Message:", response.payload);
+          console.log(LogLevel.INFO, "Complete Message:", response.data);
         }
       } catch (error) {
         this.log(LogLevel.ERROR, "Error parsing message:", error);
@@ -123,6 +130,55 @@ export class WebSocketManager {
           "WebSocket Connection",
           `Connection failed after ${CONFIG.maxRetries} attempts. No further retries.`
         );
+      }
+    };
+
+    let accumulatedMessage = ""; // Variable to hold the accumulated message
+
+    this.socket.onmessage = async (event) => {
+      try {
+        const response = JSON.parse(event.data) as ServerResponse;
+        console.log("WebSocket message received:");
+
+        if (response.type === "token") {
+          // Append the current token's data to the accumulated message
+          accumulatedMessage += response.data || "";
+
+          // store partial messages in storage for real-time UI updates
+          console.log("Storing partial message in storage:");
+          await chrome.storage.local.set({
+            serverResponse: accumulatedMessage,
+          });
+        } else if (response.type === "complete") {
+          // Finalize the message storage when type is "complete"
+          console.log("Final complete message received:");
+          // Reset the accumulated message for future messages
+          accumulatedMessage = "";
+        } else {
+          console.warn("Unhandled response type:", response.type);
+        }
+
+        // Handle popup creation or focus
+        chrome.windows.getAll({ populate: true }, (windows) => {
+          const existingWindow = windows.find((w) =>
+            w.tabs?.some((tab) => tab.url?.includes("response.html"))
+          );
+
+          if (existingWindow) {
+            console.log("Popup already open, focusing window");
+            chrome.windows.update(existingWindow.id!, { focused: true });
+          } else {
+            console.log("Creating new popup window for response.html");
+            chrome.windows.create({
+              url: chrome.runtime.getURL("response.html"),
+              type: "popup",
+              width: 800,
+              height: 900,
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
       }
     };
   }

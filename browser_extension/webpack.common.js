@@ -8,8 +8,8 @@ module.exports = {
   entry: {
     popup: path.resolve("src/popup/popup.tsx"),
     options: path.resolve("src/options/options.tsx"),
+    response: path.resolve("src/response/response.tsx"),
     background: path.resolve("src/background/background.ts"),
-    contentScript: path.resolve("src/contentScript/contentScript.ts"),
   },
   module: {
     rules: [
@@ -54,7 +54,7 @@ module.exports = {
         },
       ],
     }),
-    ...getHtmlPlugins(["popup", "options"]),
+    ...getHtmlPlugins(["popup", "options", "response"]),
     new Dotenv(),
   ],
   output: {
@@ -74,7 +74,7 @@ function getHtmlPlugins(chunks) {
   return chunks.map(
     (chunk) =>
       new HtmlPlugin({
-        title: "React Extension",
+        title: "SimpliSense",
         filename: `${chunk}.html`,
         chunks: [chunk],
       })
