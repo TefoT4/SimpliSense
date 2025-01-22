@@ -157,26 +157,6 @@ export class WebSocketManager {
         } else {
           console.warn("Unhandled response type:", response.type);
         }
-
-        // Handle popup creation or focus
-        chrome.windows.getAll({ populate: true }, (windows) => {
-          const existingWindow = windows.find((w) =>
-            w.tabs?.some((tab) => tab.url?.includes("response.html"))
-          );
-
-          if (existingWindow) {
-            console.log("Popup already open, focusing window");
-            chrome.windows.update(existingWindow.id!, { focused: true });
-          } else {
-            console.log("Creating new popup window for response.html");
-            chrome.windows.create({
-              url: chrome.runtime.getURL("response.html"),
-              type: "popup",
-              width: 800,
-              height: 900,
-            });
-          }
-        });
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }

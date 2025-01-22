@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import "../styles/global.css";
 
-const ServerResponseWindow: React.FC = () => {
+const App: React.FC = () => {
   const [message, setMessage] = useState<string>("Loading response...");
 
   useEffect(() => {
@@ -59,4 +59,4 @@ const ServerResponseWindow: React.FC = () => {
 // Root element creation and React rendering logic
 const root = document.createElement("div");
 document.body.appendChild(root);
-ReactDOM.render(<ServerResponseWindow />, root);
+ReactDOM.render(<App />, root);

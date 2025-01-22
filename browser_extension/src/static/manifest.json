@@ -17,18 +17,16 @@
     "storage",
     "notifications",
     "contextMenus",
+    "sidePanel",
     "activeTab",
-    "tabs",
-    "activeTab"
+    "tabs"
   ],
   "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
   },
-  "web_accessible_resources": [
-    {
-      "resources": ["response.html"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  "side_panel": {
+    "default_title": "SimpliSense",
+    "default_path": "response.html"
+  }
 }

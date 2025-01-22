@@ -44,7 +44,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 // Handle context menu clicks
-chrome.contextMenus.onClicked.addListener(async (info) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "processText" && info.selectionText) {
     const config = wsManager.getConfig();
     const message: WebSocketMessage = {
@@ -54,9 +54,25 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
       Query: info.selectionText.trim(),
     };
 
+    chrome.sidePanel
+      .setPanelBehavior({ openPanelOnActionClick: true })
+      .catch((error) => console.error(error));
+
+    chrome.sidePanel
+      .open({ tabId: tab?.id!, windowId: tab?.windowId })
+      .catch((error) => console.error(error));
+
+    chrome.sidePanel.setOptions({
+      path: "response.html", // Path to the side panel HTML
+      enabled: true,
+    });
+
+    console.log("Sending message to WebSocket...");
     await wsManager.sendMessage(message);
   }
 });
+
+
 
 // Cleanup on extension unload
 chrome.runtime.onSuspend.addListener(() => {
