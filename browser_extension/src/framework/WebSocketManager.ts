@@ -1,15 +1,17 @@
 import { CONFIG } from "../models/Config";
 import { LogLevel } from "../models/LogLevel";
-import { WebSocketMessageQueue } from "./WebSocketMessageQueue";
 import { StorageConfig } from "../models/StorageConfig";
 import { ServerResponse } from "../models/ServerResponse";
 import { WebSocketMessage } from "../models/WebSocketMessage";
+import { WebSocketMessageQueue } from "./WebSocketMessageQueue";
 
 export class WebSocketManager {
-  private socket: WebSocket | null = null;
   private retryCount = 0;
-  private messageQueue: WebSocketMessageQueue;
   private config: StorageConfig;
+  private socket: WebSocket | null = null;
+  private messageQueue: WebSocketMessageQueue;
+  private idleTimeout: NodeJS.Timeout | null = null;
+  private accumulatedMessage: string = "";
 
   constructor(
     private readonly backendUrl: string = process.env.REACT_APP_BACKEND_URL ??
@@ -27,7 +29,6 @@ export class WebSocketManager {
 
   private log(level: LogLevel, message: string, data?: unknown): void {
     const timestamp = new Date().toISOString();
-
     (console as any)[LogLevel[level].toLowerCase()](
       `[${timestamp}] ${message}`,
       data
@@ -39,6 +40,79 @@ export class WebSocketManager {
       CONFIG.baseRetryInterval * Math.pow(2, this.retryCount),
       CONFIG.maxRetryDelay
     );
+  }
+
+  private resetIdleTimer(): void {
+    if (this.idleTimeout) clearTimeout(this.idleTimeout);
+    this.idleTimeout = setTimeout(() => {
+      this.log(LogLevel.WARN, "WebSocket idle for too long, reconnecting...");
+      this.socket?.close();
+    }, CONFIG.idleTimeout);
+  }
+
+  private setupEventHandlers(): void {
+    if (!this.socket) return;
+
+    this.socket.onopen = async () => {
+      this.log(LogLevel.INFO, "WebSocket connected successfully.");
+      this.retryCount = 0;
+      this.resetIdleTimer();
+      await this.messageQueue.processQueue(this.socket!);
+    };
+
+    this.socket.onmessage = async (event) => {
+      this.resetIdleTimer();
+      try {
+        const response = JSON.parse(event.data) as ServerResponse;
+        switch (response.type) {
+          case "token":
+            this.handleTokenMessage(response.data);
+            break;
+          case "complete":
+            this.handleCompleteMessage(response.data);
+            break;
+          default:
+            console.warn("Unhandled response type:", response.type);
+        }
+      } catch (error) {
+        this.log(LogLevel.ERROR, "Error parsing WebSocket message:", error);
+      }
+    };
+
+    this.socket.onerror = (error) => {
+      this.log(LogLevel.ERROR, "WebSocket encountered an error:", error);
+    };
+
+    this.socket.onclose = async () => {
+      this.log(LogLevel.INFO, "WebSocket connection closed.");
+      if (this.retryCount < CONFIG.maxRetries) {
+        await this.retryConnection();
+      } else {
+        await this.sendNotification(
+          "WebSocket Connection",
+          `Connection failed after ${CONFIG.maxRetries} attempts. No further retries.`
+        );
+      }
+    };
+  }
+
+  private handleTokenMessage(data: string): void {
+    console.log("Handling token message:");
+
+    // Append the current token's data to the accumulated message
+    this.accumulatedMessage += data;
+
+    // store partial messages in storage for real-time UI updates
+    console.log("Storing partial message in storage:");
+    chrome.storage.local.set({
+      serverResponse: this.accumulatedMessage,
+    });
+  }
+
+  private handleCompleteMessage(data: string): void {
+    console.log("Handling complete message:", data);
+    // Reset the accumulated message for future messages
+    this.accumulatedMessage = "";
   }
 
   private async sendNotification(
@@ -72,95 +146,6 @@ export class WebSocketManager {
     setTimeout(() => {
       this.connect();
     }, delay);
-  }
-
-  private setupEventHandlers(): void {
-    if (!this.socket) return;
-
-    this.socket.onopen = async () => {
-      this.log(LogLevel.INFO, "WebSocket connected successfully.");
-      this.retryCount = 0;
-      await this.sendNotification(
-        "WebSocket Connection",
-        "Connected to the server successfully!"
-      );
-      await this.messageQueue.processQueue(this.socket!);
-    };
-
-    this.socket.onmessage = async (event) => {
-      try {
-        const response = JSON.parse(event.data) as ServerResponse;
-
-        if (response.type === "token") {
-          console.log(LogLevel.INFO, "Token Message:", response.data);
-
-          const message = {
-            type: "RESPONSE_RECEIVED",
-            payload: response.data,
-          };
-          console.log(
-            "Sending chrome runtime message to background.ts:",
-            message
-          );
-          await chrome.runtime.sendMessage(message, (response) => {
-            console.log(
-              `Response from background.ts: ${JSON.stringify(response)}`
-            );
-          });
-        }
-
-        if (response.type === "complete") {
-          console.log(LogLevel.INFO, "Complete Message:", response.data);
-        }
-      } catch (error) {
-        this.log(LogLevel.ERROR, "Error parsing message:", error);
-      }
-    };
-
-    this.socket.onerror = (error) => {
-      this.log(LogLevel.ERROR, "WebSocket encountered an error:", error);
-    };
-
-    this.socket.onclose = async () => {
-      this.log(LogLevel.INFO, "WebSocket connection closed.");
-      if (this.retryCount < CONFIG.maxRetries) {
-        await this.retryConnection();
-      } else {
-        await this.sendNotification(
-          "WebSocket Connection",
-          `Connection failed after ${CONFIG.maxRetries} attempts. No further retries.`
-        );
-      }
-    };
-
-    let accumulatedMessage = ""; // Variable to hold the accumulated message
-
-    this.socket.onmessage = async (event) => {
-      try {
-        const response = JSON.parse(event.data) as ServerResponse;
-        console.log("WebSocket message received:");
-
-        if (response.type === "token") {
-          // Append the current token's data to the accumulated message
-          accumulatedMessage += response.data || "";
-
-          // store partial messages in storage for real-time UI updates
-          console.log("Storing partial message in storage:");
-          await chrome.storage.local.set({
-            serverResponse: accumulatedMessage,
-          });
-        } else if (response.type === "complete") {
-          // Finalize the message storage when type is "complete"
-          console.log("Final complete message received:");
-          // Reset the accumulated message for future messages
-          accumulatedMessage = "";
-        } else {
-          console.warn("Unhandled response type:", response.type);
-        }
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-      }
-    };
   }
 
   public connect(): void {
@@ -200,5 +185,12 @@ export class WebSocketManager {
 
   public getConfig(): StorageConfig {
     return { ...this.config };
+  }
+
+  public disconnect(): void {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
   }
 }
