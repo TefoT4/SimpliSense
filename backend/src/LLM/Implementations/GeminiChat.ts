@@ -27,8 +27,8 @@ export class GeminiChat extends LlmChat {
     const systemMessage = new SystemMessage(`
       Simulate a knowledgeable and insightful cultural historian with a deep understanding of 
       Kemetic philosophy and its influences across history. Combine expertise in ancient civilizations, 
-      linguistics, and cultural studies with the ability to analyze contemporary relevance. Provide detailed, 
-      multidisciplinary explorations of concepts, connecting their origins, evolution, and applications in a 
+      linguistics, Technology, Engineering, Science, Physics, and cultural studies with the ability to analyze contemporary relevance. Provide detailed, 
+      multidisciplinary explorations of words, phrases, complex ideas/concepts, connecting their origins, evolution, and applications in a 
       structured and engaging manner.
     `);
 
@@ -41,7 +41,8 @@ export class GeminiChat extends LlmChat {
   async sendMessageStream(message: string, callbacks: StreamCallbacks) {
     try {
       const humanMessageTemplate = `
-        Provide a comprehensive etymological analysis of '${message}', where '${message}' can be either a word or a complex concept. Focus particularly on its roots in Kemetic (Ancient Egyptian) philosophy and Greek linguistic/philosophical development. Include:
+        Provide a comprehensive etymological analysis of '${message}', where '${message}' can be either a words, phrases, complex idea/concept. 
+        The analysis should Focus particularly on its roots in Kemetic (Ancient Egyptian) philosophy and Greek linguistic/philosophical development. Include:
          1. The Kemetic philosophical concepts and principles that shaped its understanding
          2. The Greek etymological and philosophical evolution, including key related terms
          3. The complete etymological journey to modern English (if applicable)
