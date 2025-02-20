@@ -1,72 +1,94 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import Card from "./controls/Card";
 import academiaImg from "@/public/academia.png";
 import businessImg from "@/public/business.png";
 import learningImg from "@/public/learning.png";
 
+const caseStudies = [
+  {
+    id: 1,
+    title: "Academia",
+    description:
+      "How graduate students improved research speed by 40% using SimpliSense",
+    image: academiaImg,
+    stats: "40% faster research completion",
+  },
+  {
+    id: 2,
+    title: "Business",
+    description:
+      "Enterprise team reduced onboarding time by 60% with AI-powered learning",
+    image: businessImg,
+    stats: "60% reduced training time",
+  },
+  {
+    id: 3,
+    title: "Personal Learning",
+    description:
+      "Content creators streamlined their fact-checking process using real-time explanations",
+    image: learningImg,
+    stats: "85% accuracy improvement",
+  },
+];
+
 const CaseStudies = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   return (
-    <div>
-      {/* Case Studies Section */}
-      <section id="case-studies" className="py-16 bg-gray-100">
-        <div className="container mx-auto px-4">
-          <h3 className="text-4xl font-bold text-center mb-8 text-black">
+    <section
+      id="case-studies"
+      className="relative min-h-screen flex items-center py-24 bg-gradient-to-b from-gray-700 to-gray-800 overflow-hidden"
+    >
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+      </div>
+
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div
+          className={`text-center mb-16 transform transition-all duration-1000 ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+          }`}
+        >
+          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
             Case Studies
-          </h3>
-          <p className="text-center text-gray-600 mb-12">
-            Discover how SimpliSense empowers users across various domains.
+          </h2>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            See how organizations are transforming knowledge sharing with
+            SimpliSense
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex flex-col items-center bg-white shadow-lg rounded-lg p-6">
-              <Image
-                src={academiaImg}
-                alt="Academia"
-                className="rounded-md w-24 h-24 mb-4"
-              />
-              <h4 className="text-lg font-bold mb-2 text-gray-800">Academia</h4>
-              <p className="text-gray-600 text-center">
-                Students in STEM fields have used SimpliSense to break down
-                complex equations, theories, and concepts into digestible
-                insights. For instance, physics students found the extension
-                invaluable in simplifying quantum mechanics through real-time,
-                step-by-step explanations of its principles.
-              </p>
-            </div>
-            <div className="flex flex-col items-center bg-white shadow-lg rounded-lg p-6">
-              <Image
-                src={businessImg}
-                alt="Business"
-                className="rounded-md w-24 h-24 mb-4"
-              />
-              <h4 className="text-lg font-bold mb-2 text-gray-800">Business</h4>
-              <p className="text-gray-600 text-center">
-                In corporate environments, marketing teams leveraged SimpliSense
-                to demystify technical terms in industry reports. The extension
-                provided instant definitions and explanations, saving valuable
-                time and boosting team productivity during high-stakes
-                presentations.
-              </p>
-            </div>
-            <div className="flex flex-col items-center bg-white shadow-lg rounded-lg p-6">
-              <Image
-                src={learningImg}
-                alt="Personal Learning"
-                className="rounded-md w-24 h-24 mb-4"
-              />
-              <h4 className="text-lg font-bold mb-2 text-gray-800">
-                Personal Learning
-              </h4>
-              <p className="text-gray-600 text-center">
-                Lifelong learners have embraced SimpliSense as a tool to explore
-                topics ranging from blockchain to philosophy. The extension’s
-                ability to simplify intricate subjects has made it a trusted
-                companion for those seeking to enhance their knowledge in their
-                free time.
-              </p>
-            </div>
-          </div>
         </div>
-      </section>
-    </div>
+
+        {/* Case Studies Grid */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {caseStudies.map((study, index) => (
+            <div
+              key={study.id}
+              className={`transform transition-all duration-1000 ${
+                isVisible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
+              }`}
+              style={{ transitionDelay: `${index * 200}ms` }}
+            >
+              <Card
+                title={study.title}
+                description={study.description}
+                image={study.image}
+                stats={study.stats}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 

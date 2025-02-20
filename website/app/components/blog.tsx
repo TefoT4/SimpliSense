@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Tag from "./controls/Tag";
 import Image from "next/image";
 
 const posts = [
@@ -5,32 +9,26 @@ const posts = [
     id: 1,
     title: "How SimpliSense Enhances Learning for Students",
     description:
-      "Discover how SimpliSense helps students in STEM fields simplify complex concepts like quantum mechanics and linear algebra through real-time explanations.",
+      "Discover how SimpliSense can help students learn more effectively with real-time explanations.",
     date: "January 15, 2025",
-    datetime: "2025-01-15",
-    category: { title: "Education", href: "/blog/education" },
-    href: "/blog/enhancing-learning-for-students",
+    category: "Education",
     author: {
-      name: "Dr. Emily Carter",
-      role: "Educational Specialist",
-      href: "/authors/emily-carter",
-      imageUrl: "authors/emily-carter.png",
+      name: "Emily Carter",
+      role: "Educator",
+      image: "/images/authors/emily-carter.png",
     },
   },
   {
     id: 2,
-    title: "Using SimpliSense in Business Presentations",
+    title: "The Future of AI in Education",
     description:
-      "Learn how professionals use SimpliSense to quickly demystify jargon and enhance clarity in business reports and high-stakes presentations.",
-    date: "February 2, 2025",
-    datetime: "2025-02-02",
-    category: { title: "Business", href: "/blog/business" },
-    href: "/blog/simplisense-in-business",
+      "Exploring the impact of AI technologies on the educational landscape.",
+    date: "February 10, 2025",
+    category: "Technology",
     author: {
       name: "Michael Brown",
-      role: "Business Strategist",
-      href: "/authors/michael-brown",
-      imageUrl: "authors/michael-brown.png",
+      role: "Tech Writer",
+      image: "/images/authors/michael-brown.png",
     },
   },
   {
@@ -39,84 +37,91 @@ const posts = [
     description:
       "Explore how SimpliSense is helping lifelong learners tackle subjects like blockchain, philosophy, and more with its intuitive explanation tools.",
     date: "March 12, 2025",
-    datetime: "2025-03-12",
-    category: { title: "Personal Growth", href: "/blog/personal-growth" },
-    href: "/blog/mastering-complex-topics",
+    category: "Personal Growth",
     author: {
       name: "Sophia Rodriguez",
       role: "Freelance Writer",
-      href: "/authors/sophia-rodriguez",
-      imageUrl: "authors/sophia-rodriguez.png",
+      image: "/images/authors/sophia-rodriguez.png",
     },
   },
 ];
 
 const Blog = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   return (
-    <div className="bg-white py-16 sm:py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:mx-0">
-          <h2 className="text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
-            From the blog
-          </h2>
-          <p className="mt-2 text-lg/8 text-gray-600">
-            Discover insights and stories about mastering complex ideas,
-            lifelong learning, and leveraging real-time knowledge in your daily
-            life.
+    <section
+      id="blog"
+      className="relative min-h-screen flex items-center py-24 bg-gray-50 overflow-hidden"
+    >
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div
+          className={`text-center mb-16 transform transition-all duration-1000 ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+          }`}
+        >
+          <h2 className="text-4xl font-bold mb-4 text-gray-900">Blog</h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Insights and updates from the world of SimpliSense
           </p>
         </div>
-        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-          {posts.map((post) => (
-            <article
+
+        {/* Blog Posts Grid */}
+        {/* 1) items-stretch => each cell stretches to the same height */}
+        <div className="grid md:grid-cols-3 gap-8 items-stretch">
+          {posts.map((post, index) => (
+            // 2) h-full on the outer wrapper
+            <div
               key={post.id}
-              className="flex max-w-xl flex-col items-start justify-between"
+              className={`transform transition-all duration-1000 ${
+                isVisible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
+              } h-full`}
+              style={{ transitionDelay: `${index * 200}ms` }}
             >
-              <div className="flex items-center gap-x-4 text-xs">
-                <time dateTime={post.datetime} className="text-gray-500">
-                  {post.date}
-                </time>
-                <a
-                  href={post.category.href}
-                  className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
-                >
-                  {post.category.title}
-                </a>
-              </div>
-              <div className="group relative">
-                <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                  <a href={post.href}>
-                    <span className="absolute inset-0" />
-                    {post.title}
-                  </a>
+              {/* 3) flex flex-col h-full on the card so it occupies full space */}
+              <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full transition-transform duration-300 hover:shadow-2xl hover:scale-105">
+                <h3 className="text-xl font-bold mb-2 text-gray-900 hover:text-blue-600 transition-colors duration-300">
+                  {post.title}
                 </h3>
-                <p className="mt-5 line-clamp-3 text-sm/6 text-gray-600">
+                <p className="text-gray-600 mb-4 line-clamp-3">
                   {post.description}
                 </p>
-              </div>
-              <div className="relative mt-8 flex items-center gap-x-4">
-                <Image
-                  alt={post.author.name}
-                  src={`/images/${post.author.imageUrl}`}
-                  width={40}
-                  height={40}
-                  className="size-10 rounded-full bg-gray-50"
-                />
 
-                <div className="text-sm/6">
-                  <p className="font-semibold text-gray-900">
-                    <a href={post.author.href}>
-                      <span className="absolute inset-0" />
+                {/* Optional: Add a spacer here if you want the tag/date/author to sit at the bottom */}
+                {/* <div className="flex-grow" /> */}
+
+                <div className="flex items-center justify-between">
+                  <Tag label={post.category} />
+                  <span className="text-gray-500">{post.date}</span>
+                </div>
+                <div className="flex items-center mt-4">
+                  <Image
+                    src={post.author.image}
+                    alt={post.author.name}
+                    width={40}
+                    height={40}
+                    className="rounded-full mr-2"
+                  />
+                  <div>
+                    <p className="text-gray-800 font-semibold">
                       {post.author.name}
-                    </a>
-                  </p>
-                  <p className="text-gray-600">{post.author.role}</p>
+                    </p>
+                    <p className="text-gray-500 text-sm">{post.author.role}</p>
+                  </div>
                 </div>
               </div>
-            </article>
+            </div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
