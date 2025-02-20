@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import CustomButton from "./controls/CustomButton";
 
 const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -36,24 +37,12 @@ const Hero = () => {
               cutting-edge technology.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <button
-                className="px-8 py-4 bg-blue-600 text-white rounded-full font-medium 
-                  transform transition-all duration-300 
-                  hover:bg-blue-700 hover:scale-105 hover:shadow-lg 
-                  active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                onClick={() => console.log("Install Extension clicked")}
-              >
+              <CustomButton variant="primary" onClick={() => console.log("Install Extension clicked")}>
                 Install Extension
-              </button>
-              <button
-                className="px-8 py-4 bg-gray-700 text-white rounded-full font-medium 
-                  transform transition-all duration-300 
-                  hover:bg-gray-600 hover:scale-105 hover:shadow-lg 
-                  active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                onClick={() => console.log("Learn More clicked")}
-              >
+              </CustomButton>
+              <CustomButton variant="secondary" onClick={() => console.log("Learn More clicked")}>
                 Learn More
-              </button>
+              </CustomButton>
             </div>
           </div>
 

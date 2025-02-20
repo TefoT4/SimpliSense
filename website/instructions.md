@@ -18,22 +18,22 @@ Below is the updated, comprehensive markdown numbered checklist for one complete
        *Expected State:* The index page renders Header, Hero, Features, CaseStudies, Blog, Pricing, and Footer correctly.
      - [x] Run `npm run build` to confirm there are no TypeScript or bundling errors.  
        *Expected Data:* Successful build output with no warnings or errors.
-     - [ ] **Install Framer Motion:**  
-         - [ ] Run `npm install framer-motion` to add Framer Motion to the project.  
+     - [x] **Install Framer Motion:**  
+         - [x] Run `npm install framer-motion` to add Framer Motion to the project.  
            *Expected State:* Framer Motion is added to `package.json` and is available for animations.
 
-   - [ ] **Run the Project Before Reviewing Components**
-     - [ ] Execute `npm run dev` and verify that the application starts and displays the index page.  
+   - [x] **Run the Project Before Reviewing Components**
+     - [x] Execute `npm run dev` and verify that the application starts and displays the index page.  
        *Expected State:* The application loads in the browser without errors before proceeding to component-specific tasks.
 
    - [ ] **Refactor and Integrate Reusable UI Controls in the Controls Folder**
-     - [ ] **Establish a "controls" Folder**
-         - [ ] Create a dedicated `controls` folder within the project structure to house all reusable UI components.
-     - [ ] **CustomButton Component**
-         - [ ] Create `CustomButton.tsx` supporting variants: `primary`, `danger`, `default`, etc.
+     - [x] **Establish a "controls" Folder**
+         - [x] Create a dedicated `controls` folder within the project structure to house all reusable UI components.
+     - [x] **CustomButton Component**
+         - [x] Create `CustomButton.tsx` supporting variants: `primary`, `danger`, `default`, etc.
              - *Data/Expected State:* Renders correctly for each variant; verifies hover, active, and disabled states; supports dark theme (e.g., `dark:bg-blue-700` for primary).
-         - [ ] **Validation:** Ensure that all buttons across the project are imported from this `CustomButton` component.
-         - [ ] **UI/UX Requirements:** Maintain consistent styling, effects, and typography.
+         - [x] **Validation:** Ensure that all buttons across the project are imported from this `CustomButton` component.
+         - [x] **UI/UX Requirements:** Maintain consistent styling, effects, and typography.
      - [ ] **NavLink Component**
          - [ ] Create `NavLink.tsx` for anchor-based navigation links with smooth scrolling.
              - *Expected State:* Renders with provided `href` and label; supports hover and active states in both light and dark themes.
