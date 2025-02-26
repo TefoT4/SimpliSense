@@ -182,7 +182,7 @@ export default function Profile() {
                   <div
                     className="bg-blue-600 h-2.5 rounded-full"
                     style={{ width: `${usageStats.percentage}%` }}
-                  ></div>
+                  />
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500 dark:text-gray-400">
