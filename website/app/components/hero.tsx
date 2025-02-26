@@ -37,10 +37,16 @@ const Hero = () => {
               cutting-edge technology.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <CustomButton variant="primary" onClick={() => console.log("Install Extension clicked")}>
+              <CustomButton
+                variant="primary"
+                onClick={() => console.log("Install Extension clicked")}
+              >
                 Install Extension
               </CustomButton>
-              <CustomButton variant="secondary" onClick={() => console.log("Learn More clicked")}>
+              <CustomButton
+                variant="secondary"
+                onClick={() => console.log("Learn More clicked")}
+              >
                 Learn More
               </CustomButton>
             </div>

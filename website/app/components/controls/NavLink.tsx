@@ -1,29 +1,48 @@
-import React from "react";
-import { useRouter } from "next/router";
-import classNames from "classnames";
+"use client";
+
+import { ReactNode } from "react";
+import Link from "next/link";
 
 interface NavLinkProps {
   href: string;
-  children: React.ReactNode;
+  label: string;
+  onClick?: () => void;
   className?: string;
-  onClick?: () => void; // Add this line
 }
-const NavLink: React.FC<NavLinkProps> = ({ href, children, className}) => {
-  const router = useRouter();
-  const isActive = router.asPath === href;
 
-  const linkClasses = classNames(
-    "transition-colors duration-300",
-    {
-      "text-blue-600": isActive,
-      "text-gray-800 hover:text-blue-600": !isActive,
-    },
-    className
-  );
+const NavLink = ({ href, label, onClick, className = "" }: NavLinkProps) => {
+  const isAnchorLink = href.startsWith("#");
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isAnchorLink) {
+      e.preventDefault();
+      const targetId = href.substring(1);
+      const targetElement = document.getElementById(targetId);
+
+      if (targetElement) {
+        window.scrollTo({
+          top: targetElement.offsetTop - 100, // Offset for header
+          behavior: "smooth",
+        });
+      }
+    }
+
+    if (onClick) onClick();
+  };
 
   return (
-    <a href={href} className={linkClasses}>
-      {children}
+    <a
+      href={href}
+      onClick={handleClick}
+      className={`text-gray-300 hover:text-white transition-all duration-300 
+        hover:transform hover:translate-y-[-2px] relative 
+        after:content-[''] after:absolute after:w-0 after:h-0.5 
+        after:bg-blue-400 after:left-0 after:bottom-[-4px] 
+        after:transition-all hover:after:w-full
+        dark:text-gray-300 dark:hover:text-white
+        dark:after:bg-blue-500 ${className}`}
+    >
+      {label}
     </a>
   );
 };

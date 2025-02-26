@@ -24,9 +24,6 @@ export default function Home() {
       <section id="blog">
         <Blog />
       </section>
-      <section className="container mx-auto">
-        <h2>Button Component Demo</h2>
-      </section>
       <Footer />
     </Fragment>
   );

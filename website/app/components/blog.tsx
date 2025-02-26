@@ -1,50 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Card from "./controls/Card";
 import Tag from "./controls/Tag";
 import Image from "next/image";
-
-const posts = [
-  {
-    id: 1,
-    title: "How SimpliSense Enhances Learning for Students",
-    description:
-      "Discover how SimpliSense can help students learn more effectively with real-time explanations.",
-    date: "January 15, 2025",
-    category: "Education",
-    author: {
-      name: "Emily Carter",
-      role: "Educator",
-      image: "/images/authors/emily-carter.png",
-    },
-  },
-  {
-    id: 2,
-    title: "The Future of AI in Education",
-    description:
-      "Exploring the impact of AI technologies on the educational landscape.",
-    date: "February 10, 2025",
-    category: "Technology",
-    author: {
-      name: "Michael Brown",
-      role: "Tech Writer",
-      image: "/images/authors/michael-brown.png",
-    },
-  },
-  {
-    id: 3,
-    title: "Mastering Complex Topics for Lifelong Learning",
-    description:
-      "Explore how SimpliSense is helping lifelong learners tackle subjects like blockchain, philosophy, and more with its intuitive explanation tools.",
-    date: "March 12, 2025",
-    category: "Personal Growth",
-    author: {
-      name: "Sophia Rodriguez",
-      role: "Freelance Writer",
-      image: "/images/authors/sophia-rodriguez.png",
-    },
-  },
-];
+import { posts } from "@/app/data/posts";
 
 const Blog = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -56,7 +16,7 @@ const Blog = () => {
   return (
     <section
       id="blog"
-      className="relative min-h-screen flex items-center py-24 bg-gray-50 overflow-hidden"
+      className="relative min-h-screen flex items-center py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden"
     >
       <div className="container mx-auto px-4">
         {/* Section Header */}
@@ -65,41 +25,45 @@ const Blog = () => {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
           }`}
         >
-          <h2 className="text-4xl font-bold mb-4 text-gray-900">Blog</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white font-sans leading-tight">
+            Blog
+          </h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto font-normal leading-relaxed tracking-wide">
             Insights and updates from the world of SimpliSense
           </p>
         </div>
 
         {/* Blog Posts Grid */}
-        {/* 1) items-stretch => each cell stretches to the same height */}
-        <div className="grid md:grid-cols-3 gap-8 items-stretch">
+        <div className="grid md:grid-cols-3 gap-8">
           {posts.map((post, index) => (
-            // 2) h-full on the outer wrapper
             <div
               key={post.id}
               className={`transform transition-all duration-1000 ${
                 isVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-10 opacity-0"
-              } h-full`}
+              }`}
               style={{ transitionDelay: `${index * 200}ms` }}
             >
-              {/* 3) flex flex-col h-full on the card so it occupies full space */}
-              <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col h-full transition-transform duration-300 hover:shadow-2xl hover:scale-105">
-                <h3 className="text-xl font-bold mb-2 text-gray-900 hover:text-blue-600 transition-colors duration-300">
-                  {post.title}
-                </h3>
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {post.description}
-                </p>
-
-                {/* Optional: Add a spacer here if you want the tag/date/author to sit at the bottom */}
-                {/* <div className="flex-grow" /> */}
-
+              <Card
+                title={post.title}
+                description={post.description}
+                image={post.image}
+                variant="default"
+                className="hover:scale-105"
+                href={`/blog/${post.id}`}
+              >
                 <div className="flex items-center justify-between">
-                  <Tag label={post.category} />
-                  <span className="text-gray-500">{post.date}</span>
+                  <Tag
+                    label={post.category}
+                    color={post.category === "Education" ? "blue" : "green"}
+                  />
+                  <time
+                    dateTime="2025-01-15"
+                    className="text-gray-500 dark:text-gray-400 text-sm font-medium"
+                  >
+                    {post.date}
+                  </time>
                 </div>
                 <div className="flex items-center mt-4">
                   <Image
@@ -107,16 +71,18 @@ const Blog = () => {
                     alt={post.author.name}
                     width={40}
                     height={40}
-                    className="rounded-full mr-2"
+                    className="rounded-full mr-2 object-cover"
                   />
                   <div>
-                    <p className="text-gray-800 font-semibold">
+                    <p className="text-gray-800 font-semibold dark:text-gray-300">
                       {post.author.name}
                     </p>
-                    <p className="text-gray-500 text-sm">{post.author.role}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      {post.author.role}
+                    </p>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           ))}
         </div>

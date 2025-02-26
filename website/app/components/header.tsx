@@ -1,151 +1,185 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import NavLink from "./controls/NavLink";
+import CustomButton from "./controls/CustomButton";
 
 const Header = () => {
-  // This would normally come from your auth context/state management
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
-  // Temporary toggle for demonstration
-  const toggleLogin = () => setIsLoggedIn(!isLoggedIn);
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const isAuthPage = pathname?.startsWith("/auth");
+  const isLoginPage = pathname === "/auth/login";
+  const isRegisterPage = pathname === "/auth/register";
+  const isBlogPage = pathname?.startsWith("/blog");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setScrolled(offset > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!user);
+  }, [pathname]); // Update login state when route changes
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-gray-800 z-50 shadow-lg transition-all duration-300">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="relative transform transition-transform duration-300 hover:scale-105"
-          >
+    <header
+      className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+        scrolled ? "bg-gray-900 shadow-lg py-2" : "bg-transparent py-4"
+      }`}
+    >
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center">
+          <Link href="/" className="flex items-center">
             <Image
               src="/simpliSense.png"
               alt="SimpliSense Logo"
-              width={150}
+              width={40}
               height={40}
-              priority
-              className="brightness-200" // Makes the logo more visible on dark background
+              className="rounded-full"
             />
+            <span className="ml-3 text-xl font-semibold text-white">
+              SimpliSense
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-gray-300 hover:text-white transition-all duration-300 hover:transform hover:translate-y-[-2px] relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-blue-400 after:left-0 after:bottom-[-4px] after:transition-all hover:after:w-full"
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 text-gray-300 hover:text-white transition-colors duration-300"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
-          >
-            <svg
-              className="w-6 h-6 transition-transform duration-300"
-              style={{
-                transform: isMobileMenuOpen ? "rotate(180deg)" : "rotate(0)",
-              }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+          {!isAuthPage && !isBlogPage && (
+            <nav className="hidden md:flex items-center space-x-8">
+              {isLoggedIn && (
+                <>
+                  <NavLink href="/dashboard" label="Dashboard" />
+                  <NavLink href="/chat" label="Chat" />
+                </>
               )}
-            </svg>
-          </button>
+              <NavLink href="#features" label="Features" />
+              <NavLink href="#how-it-works" label="How It Works" />
+              <NavLink href="#pricing" label="Pricing" />
+              <NavLink href="#blog" label="Blog" />
+            </nav>
+          )}
 
-          {/* Auth Button (Desktop) */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
-              <button
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 hover:shadow-lg hover:transform hover:translate-y-[-2px]"
-                onClick={toggleLogin}
-              >
+              <Link href="/profile" className="flex items-center space-x-2">
                 <Image
                   src="/profile-placeholder.png"
                   alt="Profile"
-                  width={32}
-                  height={32}
-                  className="rounded-full border-2 border-white"
+                  width={24}
+                  height={24}
+                  className="rounded-full"
                 />
-                <span>Profile</span>
-              </button>
+                <span className="text-white">Profile</span>
+              </Link>
             ) : (
-              <button
-                className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 hover:shadow-lg hover:transform hover:translate-y-[-2px]"
-                onClick={toggleLogin}
-              >
-                Login
-              </button>
+              <>
+                {!isLoginPage && (
+                  <Link href="/auth/login">
+                    <CustomButton variant="default">Login</CustomButton>
+                  </Link>
+                )}
+                {!isRegisterPage && (
+                  <Link href="/auth/register">
+                    <CustomButton variant="primary">Register</CustomButton>
+                  </Link>
+                )}
+              </>
             )}
           </div>
+
+          <button
+            type="button"
+            className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none"
+            onClick={toggleMobileMenu}
+          >
+            <span className="sr-only">Open menu</span>
+            <svg
+              className="h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`md:hidden overflow-hidden transition-all duration-300 ${
-            isMobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
-          <nav className="flex flex-col gap-4 py-4">
-            {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-gray-300 hover:text-white transition-all duration-300 px-2 py-1 rounded hover:bg-gray-700"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item}
-              </a>
-            ))}
-            {/* Auth Button (Mobile) */}
-            {isLoggedIn ? (
-              <button
-                className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white transition-colors duration-300"
-                onClick={toggleLogin}
-              >
-                <Image
-                  src="/profile-placeholder.png"
-                  alt="Profile"
-                  width={34}
-                  height={34}
-                />
-                <span>Profile</span>
-              </button>
-            ) : (
-              <button
-                className="text-left px-2 py-1 text-gray-300 hover:text-white transition-colors duration-300"
-                onClick={toggleLogin}
-              >
-                Login
-              </button>
-            )}
-          </nav>
-        </div>
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4">
+            <nav className="flex flex-col space-y-4">
+              {!isAuthPage && !isBlogPage && (
+                <>
+                  {isLoggedIn && (
+                    <>
+                      <NavLink href="/dashboard" label="Dashboard" />
+                      <NavLink href="/chat" label="Chat" />
+                    </>
+                  )}
+                  <NavLink href="#features" label="Features" />
+                  <NavLink href="#how-it-works" label="How It Works" />
+                  <NavLink href="#pricing" label="Pricing" />
+                  <NavLink href="#blog" label="Blog" />
+                </>
+              )}
+
+              {isLoggedIn ? (
+                <Link
+                  href="/profile"
+                  className="flex items-center space-x-2 text-left"
+                >
+                  <Image
+                    src="/profile-placeholder.png"
+                    alt="Profile"
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                  <span>Profile</span>
+                </Link>
+              ) : (
+                <>
+                  {!isLoginPage && (
+                    <Link href="/auth/login" className="text-left">
+                      <CustomButton variant="default" className="w-full">
+                        Login
+                      </CustomButton>
+                    </Link>
+                  )}
+                  {!isRegisterPage && (
+                    <Link href="/auth/register" className="text-left">
+                      <CustomButton variant="primary" className="w-full">
+                        Register
+                      </CustomButton>
+                    </Link>
+                  )}
+                </>
+              )}
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -57,10 +57,10 @@ const CaseStudies = () => {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
           }`}
         >
-          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
+          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 font-sans leading-tight">
             Case Studies
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto font-normal leading-relaxed tracking-wide">
             See how organizations are transforming knowledge sharing with
             SimpliSense
           </p>
@@ -82,7 +82,13 @@ const CaseStudies = () => {
                 title={study.title}
                 description={study.description}
                 image={study.image}
-                stats={study.stats}
+                variant="elevated"
+                footer={
+                  <div className="flex items-center text-blue-500 font-semibold">
+                    <span className="text-2xl mr-2">↑</span>
+                    {study.stats}
+                  </div>
+                }
               />
             </div>
           ))}
