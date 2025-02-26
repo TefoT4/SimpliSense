@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Card from "./controls/Card";
-import Tag from "./controls/Tag";
+import Card from "../components/controls/Card";
+import Tag from "../components/controls/Tag";
 import Image from "next/image";
 import { posts } from "@/app/data/posts";
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { posts } from "@/app/data/posts";
 import Tag from "@/app/components/controls/Tag";
 import Header from "@/app/components/header";
-import BlogContent from "@/app/components/blog/BlogContent";
+import BlogContent from "@/app/blog/BlogContent";
 
 export async function generateStaticParams() {
   return posts.map((post) => ({

@@ -338,3 +338,30 @@ These tasks replace the current raw HTML in the `details` property with structur
   - [x] Link analytics page from header navigation
   - [x] Ensure proper routing and navigation
 
+---
+
+## 10. Apply Recommended Next.js Project Organization Guidelines
+
+- [ ] **10.1 Restructure `app/` Directory for Route-Based Organization**  
+  - [ ] Create dedicated route folders in the `app/` directory for each major feature or route (e.g., `auth/`, `blog/`, `analytics/`, `pricing/`).  
+  - [ ] Move route-specific components (e.g., `BlogContent.tsx`) into their corresponding route folder if they’re only used there.  
+  - [ ] Keep truly shared components in `app/components/`.  
+  - [ ] Maintain low-level UI elements (e.g., `CustomButton`, `InputField`, `Card`, `Modal`, `Tag`) in `app/components/controls/`.
+
+- [ ] **10.2 Create Separate Folders for Data, Utils, and Types**  
+  - [ ] Move or create an `app/data/` folder for data files (`posts.ts`, `pricing.ts`, etc.).  
+  - [ ] Create an `app/utils/` folder for utility functions (e.g., `apiHelpers.ts`, `blogParser.ts`).  
+  - [ ] Create an `app/types/` folder for shared TypeScript interfaces (e.g., `blog.ts`, `auth.ts`).  
+  - [ ] Update all imports to reference these new paths correctly.
+
+- [ ] **10.3 Clean Up Existing References**  
+  - [ ] Remove or update references to old file paths in imports across the project.  
+  - [ ] Verify that all routes function properly after reorganization.  
+  - [ ] Ensure each route’s layout is well-defined (or uses the root layout if none is specified).  
+  - [ ] Confirm the new structure aligns with Next.js 13 App Router best practices.
+
+- [ ] **10.4 Document the New Structure**  
+  - [ ] Update the project’s README or internal docs to reflect the new folder layout.  
+  - [ ] Provide short explanations for each folder’s purpose (e.g., “`app/blog/` for blog routes,” “`app/data/` for static data,” etc.).  
+  - [ ] Include any relevant notes on how to add new routes, components, or utilities.
+

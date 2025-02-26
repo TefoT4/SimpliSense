@@ -1,5 +1,6 @@
-import React from "react";
+import React, { JSX } from "react";
 import { BlogBlock } from "@/app/types/blog";
+import Image from "next/image";
 
 interface BlogContentProps {
   blocks: BlogBlock[];
@@ -61,10 +62,12 @@ const BlogContent: React.FC<BlogContentProps> = ({ blocks }) => {
           case "image":
             return (
               <figure key={index} className="my-6">
-                <img
+                <Image
                   src={block.src}
                   alt={block.alt}
                   className="rounded-lg w-full"
+                  width={800}
+                  height={400}
                 />
                 {block.caption && (
                   <figcaption className="text-sm text-center text-gray-500 mt-2">

@@ -5,7 +5,7 @@ import Features from "./components/features";
 import Pricing from "./components/pricing";
 import Footer from "./components/footer";
 import CaseStudies from "./components/casestudies";
-import Blog from "./components/blog";
+import Blog from "./blog/blog";
 
 export default function Home() {
   return (
