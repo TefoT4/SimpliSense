@@ -98,11 +98,6 @@ export default function Profile() {
     setChangesMade(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    router.push("/");
-  };
-
   if (isLoading) {
     return (
       <>
@@ -255,56 +250,6 @@ export default function Profile() {
                     </CustomButton>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Account Actions */}
-            <div className="px-6 py-6 bg-gray-50 dark:bg-gray-700/50">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Account Actions
-              </h3>
-              <div className="space-y-3">
-                <CustomButton
-                  variant="primary"
-                  className="text-gray-700 dark:text-gray-300 w-full sm:w-auto justify-start"
-                  onClick={() => router.push("/")}
-                >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 12l2-2m0 0l7-7 7 7m-7-7v14"
-                    />
-                  </svg>
-                  Back to Home
-                </CustomButton>
-
-                <CustomButton
-                  variant="danger"
-                  className="w-full sm:w-auto justify-start"
-                  onClick={handleLogout}
-                >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  Log Out
-                </CustomButton>
               </div>
             </div>
           </div>
