@@ -4,26 +4,17 @@ FROM node:18
 # Set the working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json first (to leverage Docker caching)
 COPY package.json package-lock.json ./
 
-# Install dependencies
+# Install all dependencies, including devDependencies to ensure TypeScript is installed
 RUN npm install
-
-# Ensure TypeScript is installed globally
-RUN npm install -g typescript
 
 # Copy the rest of the application source code
 COPY . .
 
-# Expose the port specified by the environment variable or default to 9900
+# ✅ No need to manually run `npm run build` here since `npm start` does it
 EXPOSE ${PORT:-9900}
 
-# Define environment variables (optional; overridden by docker-compose or runtime configuration)
-ENV NODE_ENV=production
-
-# Build the application using TypeScript
-RUN npx tsc --project tsconfig.json
-
-# Start the application
+# Start the application (this will compile TypeScript first)
 CMD ["npm", "start"]

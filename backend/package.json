@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/server.ts",
-    "start": "node dist/server.js",
+    "start": "npm run build && node dist/server.js",
     "debug": "tsc -w",
     "build": "tsc"
   },
@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.5.13",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   }
 }
