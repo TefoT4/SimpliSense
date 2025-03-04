@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "ts-node src/server.ts",
     "start": "node dist/server.js",
-    "build": "tsc -w"
+    "debug": "tsc -w",
+    "build": "tsc"
   },
   "type": "commonjs",
   "keywords": [],
