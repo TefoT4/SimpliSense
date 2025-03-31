@@ -18,7 +18,7 @@ export class GeminiChat extends LlmChat {
     super(apiKey);
     this.model = new ChatGoogleGenerativeAI({
       apiKey,
-      modelName: "gemini-pro",
+      modelName: "gemini-2.5-pro-exp-03-25",
       temperature: 0.5,
       topP: 1,
       streaming: true, // Enable streaming
@@ -36,6 +36,8 @@ export class GeminiChat extends LlmChat {
       systemMessage,
       new MessagesPlaceholder("msgs"),
     ]);
+
+    console.log(this.model);
   }
 
   async sendMessageStream(message: string, callbacks: StreamCallbacks) {

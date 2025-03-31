@@ -13,11 +13,11 @@ const clientRateLimits = new Map<string, number>();
 const clientTimeouts = new Map<WebSocket, NodeJS.Timeout>();
 
 // Create WebSocket Server
-const websocketServer = new WebSocketServer({ port: Number(PORT) });
+const websocketServer = new WebSocketServer({
+  host: "0.0.0.0",
+  port: Number(PORT),
+});
 console.log(`WebSocket server is running on ws://localhost:${PORT}`);
-
-// ✅ WebSocket-based Health Check
-const healthCheckServer = new WebSocketServer({ noServer: true });
 
 websocketServer.on("connection", (socket: WebSocket, request) => {
   console.log("Client connected");
@@ -91,21 +91,6 @@ websocketServer.on("connection", (socket: WebSocket, request) => {
     }
     clientRateLimits.delete(clientId);
   });
-});
-
-// ✅ WebSocket-based Health Check
-websocketServer.on("upgrade", (request, socket, head) => {
-  if (request.url === "/isalive") {
-    healthCheckServer.handleUpgrade(request, socket, head, (ws) => {
-      healthCheckServer.emit("connection", ws, request);
-    });
-  }
-});
-
-healthCheckServer.on("connection", (ws) => {
-  console.log("Health check WebSocket connected");
-  ws.send(JSON.stringify({ status: "ok" }));
-  setTimeout(() => ws.close(), 1000);
 });
 
 async function sendRequestToLLM(
