@@ -17,23 +17,34 @@ export const ConnectionProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
 
+  useEffect(() => {
+    // Listen for updates from the background WebSocketManager
+    const listener = (message: any) => {
+      if (message.type === "socket-status") {
+        setStatus(message.status);
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(listener);
+
+    // Auto-connect
+    connect();
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+      disconnect();
+    };
+  }, []);
+
   const connect = () => {
     setStatus("connecting");
-
-    // Simulate connection process
-    setTimeout(() => {
-      setStatus("connected");
-    }, 2000);
+    chrome.runtime.sendMessage({ type: "connect-socket" });
   };
 
   const disconnect = () => {
+    chrome.runtime.sendMessage({ type: "disconnect-socket" });
     setStatus("disconnected");
   };
-
-  // Auto-connect on load
-  useEffect(() => {
-    connect();
-  }, []);
 
   return (
     <ConnectionContext.Provider value={{ status, connect, disconnect }}>
@@ -44,7 +55,7 @@ export const ConnectionProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useConnectionStatus = () => {
   const context = useContext(ConnectionContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       "useConnectionStatus must be used within a ConnectionProvider"
     );

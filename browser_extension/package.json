@@ -1,7 +1,7 @@
 {
   "name": "simplisense",
   "version": "1.0.0",
-  "description": "Explainer: Harness the power of AI to demystify words and concepts, turning complex ideas into clear, understandable insights anytime, anywhere.",
+  "description": "SimpliSense: Harness the power of AI to demystify words and concepts, turning complex ideas into clear, understandable insights anytime, anywhere.",
   "scripts": {
     "start": "webpack --watch --progress --config webpack.dev.js",
     "build": "webpack --watch --progress --config webpack.prod.js",

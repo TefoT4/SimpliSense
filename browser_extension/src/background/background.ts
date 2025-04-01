@@ -1,13 +1,19 @@
 import { v4 as getId } from "uuid";
-import { WebSocketManager } from "../framework/WebSocketManager";
 import { StorageConfig } from "../models/StorageConfig";
 import { CONFIG } from "../models/Config";
 import { WebSocketMessage } from "../models/WebSocketMessage";
+import webSocketManager from "../framework/WebSocketManager";
 
-// Initialize WebSocket Manager
-const wsManager = new WebSocketManager();
+// 🔁 Broadcast socket status to UI
+function broadcastSocketStatus(status: "connected" | "disconnected") {
+  chrome.runtime.sendMessage({ type: "socket-status", status }).catch((e) => {
+    if (!e.message.includes("Receiving end does not exist")) {
+      console.error("Failed to send socket status:", e);
+    }
+  });
+}
 
-// Storage initialization
+// 📦 Initialize user config in storage
 async function initializeStorage(): Promise<void> {
   try {
     await chrome.storage.sync.get(
@@ -19,9 +25,9 @@ async function initializeStorage(): Promise<void> {
             apiKey: "",
             preferredLLM: CONFIG.defaultLLM,
           };
-          wsManager.updateConfig(newSettings);
+          webSocketManager.updateConfig(newSettings);
         } else {
-          wsManager.updateConfig(result as StorageConfig);
+          webSocketManager.updateConfig(result as StorageConfig);
         }
       }
     );
@@ -31,7 +37,12 @@ async function initializeStorage(): Promise<void> {
   }
 }
 
-// Context Menu Setup
+// 🔌 WebSocket Events
+webSocketManager.onOpen(() => broadcastSocketStatus("connected"));
+webSocketManager.onClose(() => broadcastSocketStatus("disconnected"));
+webSocketManager.onError(() => broadcastSocketStatus("disconnected"));
+
+// 📋 Add context menu on install
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.contextMenus.create({
     id: "processText",
@@ -40,13 +51,13 @@ chrome.runtime.onInstalled.addListener(async () => {
   });
 
   await initializeStorage();
-  wsManager.connect();
+  webSocketManager.connect();
 });
 
-// Handle context menu clicks
+// 📋 Context menu handler (side panel only)
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "processText" && info.selectionText) {
-    const config = wsManager.getConfig();
+    const config = webSocketManager.getConfig();
     const message: WebSocketMessage = {
       Id: config.Id,
       Llm: config.preferredLLM,
@@ -63,27 +74,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       .catch((error) => console.error(error));
 
     chrome.sidePanel.setOptions({
-      path: "response.html", // Path to the side panel HTML
+      path: "response.html",
       enabled: true,
     });
 
     console.log("Sending message to WebSocket...");
-    await wsManager.sendMessage(message);
+    await webSocketManager.sendMessage(message);
   }
 });
 
-
-
-// Cleanup on extension unload
-chrome.runtime.onSuspend.addListener(() => {
-  // Close WebSocket connection
-  const socket = wsManager["socket"];
-  if (socket) {
-    socket.close();
-  }
-});
-
-// Listen for storage changes
+// 🔄 Update stored config
 chrome.storage.onChanged.addListener(async (changes) => {
   const updates: Partial<StorageConfig> = {};
 
@@ -93,16 +93,27 @@ chrome.storage.onChanged.addListener(async (changes) => {
     updates.preferredLLM = changes.preferredLLM.newValue;
 
   if (Object.keys(updates).length > 0) {
-    await wsManager.updateConfig(updates);
+    await webSocketManager.updateConfig(updates);
   }
 });
 
-// Track active popup windows
-let activePopupId: number = 100;
-
-// Clean up when popup closes
-chrome.windows.onRemoved.addListener((windowId) => {
-  if (windowId === activePopupId) {
-    activePopupId = 0;
+// 🧹 Cleanup WebSocket on suspend
+chrome.runtime.onSuspend.addListener(() => {
+  const socket = webSocketManager["socket"];
+  if (socket) {
+    socket.close();
   }
+});
+
+// 📩 Minimal message handling
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.type === "connect-socket") {
+    webSocketManager.connect();
+  }
+
+  if (request.type === "disconnect-socket") {
+    webSocketManager.disconnect();
+  }
+
+  return false;
 });

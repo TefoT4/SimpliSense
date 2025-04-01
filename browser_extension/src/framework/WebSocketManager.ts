@@ -5,13 +5,18 @@ import { ServerResponse } from "../models/ServerResponse";
 import { WebSocketMessage } from "../models/WebSocketMessage";
 import { WebSocketMessageQueue } from "./WebSocketMessageQueue";
 
-export class WebSocketManager {
+class WebSocketManager {
   private retryCount = 0;
   private config: StorageConfig;
   private socket: WebSocket | null = null;
   private messageQueue: WebSocketMessageQueue;
   private idleTimeout: NodeJS.Timeout | null = null;
   private accumulatedMessage: string = "";
+
+  // Event listener storage
+  private onOpenListeners: (() => void)[] = [];
+  private onCloseListeners: (() => void)[] = [];
+  private onErrorListeners: (() => void)[] = [];
 
   constructor(
     private readonly backendUrl: string = process.env.REACT_APP_BACKEND_URL ??
@@ -36,10 +41,11 @@ export class WebSocketManager {
   }
 
   private getRetryDelay(): number {
-    return Math.min(
-      CONFIG.baseRetryInterval * Math.pow(2, this.retryCount),
-      CONFIG.maxRetryDelay
-    );
+    const base = CONFIG.baseRetryInterval;
+    const max = CONFIG.maxRetryDelay;
+    const exponential = Math.min(base * Math.pow(2, this.retryCount), max);
+    const jitter = Math.random() * 1000; // Add up to 1s random jitter
+    return exponential + jitter;
   }
 
   private resetIdleTimer(): void {
@@ -57,6 +63,7 @@ export class WebSocketManager {
       this.log(LogLevel.INFO, "WebSocket connected successfully.");
       this.retryCount = 0;
       this.resetIdleTimer();
+      this.onOpenListeners.forEach((cb) => cb());
       await this.messageQueue.processQueue(this.socket!);
     };
 
@@ -81,10 +88,13 @@ export class WebSocketManager {
 
     this.socket.onerror = (error) => {
       this.log(LogLevel.ERROR, "WebSocket encountered an error:", error);
+      this.onErrorListeners.forEach((cb) => cb());
     };
 
     this.socket.onclose = async () => {
       this.log(LogLevel.INFO, "WebSocket connection closed.");
+      this.onCloseListeners.forEach((cb) => cb());
+
       if (this.retryCount < CONFIG.maxRetries) {
         await this.retryConnection();
       } else {
@@ -97,21 +107,13 @@ export class WebSocketManager {
   }
 
   private handleTokenMessage(data: string): void {
-    console.log("Handling token message:");
-
-    // Append the current token's data to the accumulated message
     this.accumulatedMessage += data;
-
-    // store partial messages in storage for real-time UI updates
-    console.log("Storing partial message in storage:");
     chrome.storage.local.set({
       serverResponse: this.accumulatedMessage,
     });
   }
 
   private handleCompleteMessage(data: string): void {
-    console.log("Handling complete message:", data);
-    // Reset the accumulated message for future messages
     this.accumulatedMessage = "";
   }
 
@@ -193,4 +195,23 @@ export class WebSocketManager {
       this.socket = null;
     }
   }
+
+  public onOpen(cb: () => void): void {
+    this.onOpenListeners.push(cb);
+  }
+
+  public onClose(cb: () => void): void {
+    this.onCloseListeners.push(cb);
+  }
+
+  public onError(cb: () => void): void {
+    this.onErrorListeners.push(cb);
+  }
+
+  public isConnected(): boolean {
+    return this.socket?.readyState === WebSocket.OPEN;
+  }
 }
+
+const webSocketManager = new WebSocketManager();
+export default webSocketManager;

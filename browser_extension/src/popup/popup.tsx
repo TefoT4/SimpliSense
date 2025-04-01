@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Info, User, MousePointer } from "lucide-react"; // Importing Lucid icons
-import DraggableDialog from "../components/draggableDialog";
 import "../styles/global.css";
 
 const App: React.FC<{}> = () => {
@@ -67,11 +66,6 @@ const App: React.FC<{}> = () => {
           explanations of words, phrases, or concepts effortlessly.
         </p>
       </div>
-
-      {/* Draggable Dialog */}
-      {response && (
-        <DraggableDialog response={response} onClose={handleCloseDialog} />
-      )}
     </div>
   );
 };
