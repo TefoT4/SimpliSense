@@ -29,7 +29,7 @@ Below is the updated, comprehensive markdown checklist for the **Website** folde
 >           - **emily-carter.png**
 >           - **michael-brown.png**
 >           - **sophia-rodriguez.png**
->       - **academin.png**
+>       - **academia.png**
 >       - **business.png**
 >       - **learning.png**
 >       - **hero.webp**
@@ -147,7 +147,7 @@ Below is the updated, comprehensive markdown checklist for the **Website** folde
 ### 1.8 Implement the Case Studies Component
 
 - [x] Render three case study cards using the `Card` component:  
-  *Data:* Cards for "Academia", "Business", "Personal Learning" display images (`academin.png`, `business.png`, `learning.png`), titles, and descriptions.
+  *Data:* Cards for "Academia", "Business", "Personal Learning" display images (`academia.png`, `business.png`, `learning.png`), titles, and descriptions.
 - [x] Ensure grid layout responsiveness:  
   *Expected State:* Single column on mobile; three columns on desktop.
 - [x] Test hover effects on cards:  
