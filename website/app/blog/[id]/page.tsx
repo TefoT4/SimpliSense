@@ -48,9 +48,10 @@ export default function BlogPost({ params }: { params: { id: string } }) {
           {/* Article header */}
           <article>
             <header className="mb-10">
-              <Tag href={`/category/${post.category.toLowerCase()}`}>
-                {post.category}
-              </Tag>
+              <Tag
+                href={`/category/${post.category.toLowerCase()}`}
+                label={post.category}
+              />
               <h1 className="text-3xl md:text-4xl font-bold mt-4 mb-6 text-gray-900 dark:text-white">
                 {post.title}
               </h1>
