@@ -34,7 +34,7 @@ To install SimpliSense, follow these steps:
 2. Install dependencies: `npm install`
 3. Set up environment variables (e.g., API keys): `cp .env.example .env`
 4. Start the backend server: `cd backend && npm start`
-5. Load the browser extension: `cd frontend && npm start`
+5. Load the browser extension: `cd browser_extension && npm start`
 
 ## Usage
 
@@ -48,8 +48,8 @@ To use SimpliSense, follow these steps:
 
 To configure SimpliSense, you can modify the following files:
 
-- [backend/src/server.ts](cci:7://file:///j:/repos/SimpliSense/backend/src/server.ts:0:0-0:0): Configure the WebSocket server and the AI models.
-- `frontend/src/config.ts`: Configure the browser extension and web application.
+- [backend/src/server.ts](backend/src/server.ts): Configure the WebSocket server and the AI models.
+- `browser_extension/src/config.ts`: Configure the browser extension and web application.
 - `.env`: Set up environment variables for API keys and other settings.
 
 ## License
