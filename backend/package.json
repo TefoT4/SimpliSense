@@ -17,7 +17,7 @@
     "@langchain/core": "^0.3.30",
     "@langchain/google-genai": "^0.1.6",
     "dotenv": "^16.4.7",
-    "langchain": "^0.3.11",
+    "langchain": "^0.3.37",
     "ws": "^8.18.0"
   },
   "overrides": {
